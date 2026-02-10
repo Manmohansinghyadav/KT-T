@@ -224,14 +224,40 @@ function updateTable(){
         body.innerHTML += `
         <tr>
             <td>Route ${i+1}</td>
-            <td>${r.passenger}</td>
-            <td>${r.route}</td>
-            <td>${r.price}</td>
+
+            <td contenteditable="true"
+                onblur="updateCell(${i}, 'passenger', this.innerText)">
+                ${r.passenger}
+            </td>
+
+            <td contenteditable="true"
+                onblur="updateCell(${i}, 'route', this.innerText)">
+                ${r.route}
+            </td>
+
+            <td contenteditable="true"
+                onblur="updateCell(${i}, 'price', this.innerText)">
+                ${r.price}
+            </td>
         </tr>`;
     });
 
     document.getElementById("totalAmount").innerText="Total : "+total;
 }
+
+function updateCell(index, field, value){
+
+    if(field === "price"){
+        value = Number(value);
+        if(isNaN(value)) value = 0;
+    }
+
+    routes[index][field] = value;
+
+    updateTable();
+}
+
+
 
 // PREVIEW
 function showPreview(){
