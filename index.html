@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice Bill Maker</title>
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- AutoTable (VERY IMPORTANT) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        body{
+            font-family: Arial;
+            padding:20px;
+            background:#f4f4f4;
+        }
+
+        input,button{
+            padding:8px;
+            margin:5px;
+        }
+
+        button{
+            background:#007bff;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+
+        table{
+            width:100%;
+            border-collapse: collapse;
+            background:white;
+            margin-top:20px;
+        }
+
+        th,td{
+            border:1px solid black;
+            padding:8px;
+            text-align:center;
+        }
+
+        #previewBox{
+            margin-top:30px;
+            padding:20px;
+            background:white;
+            border:2px solid black;
+            display:none;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Invoice Bill Maker</h2>
+
+<input type="text" id="passenger" placeholder="Passenger Name">
+<input type="text" id="route" placeholder="Route Details">
+<input type="number" id="price" placeholder="Route Price">
+
+<br>
+
+<button onclick="addEntry()">Add Route</button>
+<button onclick="showPreview()">Preview Invoice</button>
+<button onclick="generatePDF()">Generate PDF</button>
+
+<table>
+<thead>
+<tr>
+<th>Route No</th>
+<th>Passenger</th>
+<th>Route</th>
+<th>Price</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+</table>
+
+<h3 id="totalAmount">Total : 0</h3>
+
+<!-- PREVIEW AREA -->
+<div id="previewBox">
+
+    <div style="text-align:center">
+        <img src="logo.png" width="120">
+        <h2>KRISHNA TOURS AND TRAVEL</h2>
+        <h3>RECEIPT / INVOICE</h3>
+    </div>
+
+    <p id="previewDate"></p>
+    <p id="previewPassenger"></p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Route</th>
+                <th>Details</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody id="previewTable"></tbody>
+    </table>
+
+    <h3 id="previewTotal"></h3>
+
+    <p style="margin-top:20px;">
+    THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS<br>
+    Contact : 7457011613<br>
+    HR38ABJ8203 (Maruti Suzuki Ertiga)
+    </p>
+
+</div>
+
+<script>
+
+let routes = [];
+
+// ADD ENTRY
+function addEntry(){
+
+    let passenger = document.getElementById("passenger").value;
+    let route = document.getElementById("route").value;
+    let price = document.getElementById("price").value;
+
+    if(!passenger || !route || !price){
+        alert("Fill all fields");
+        return;
+    }
+
+    routes.push({
+        passenger,
+        route,
+        price:Number(price)
+    });
+
+    updateTable();
+
+    document.getElementById("passenger").value="";
+    document.getElementById("route").value="";
+    document.getElementById("price").value="";
+}
+
+// UPDATE TABLE
+function updateTable(){
+
+    let body = document.getElementById("tableBody");
+    body.innerHTML="";
+
+    let total=0;
+
+    routes.forEach((r,i)=>{
+        total += r.price;
+
+        body.innerHTML += `
+        <tr>
+            <td>Route ${i+1}</td>
+            <td>${r.passenger}</td>
+            <td>${r.route}</td>
+            <td>${r.price}</td>
+        </tr>`;
+    });
+
+    document.getElementById("totalAmount").innerText="Total : "+total;
+}
+
+// PREVIEW
+function showPreview(){
+
+    if(routes.length === 0){
+        alert("Add at least one route");
+        return;
+    }
+
+    document.getElementById("previewBox").style.display = "block";
+
+    let today = new Date().toLocaleDateString();
+    document.getElementById("previewDate").innerText = "Date : " + today;
+
+    document.getElementById("previewPassenger").innerText =
+        "Passenger : " + routes[0].passenger;
+
+    let table = document.getElementById("previewTable");
+    table.innerHTML = "";
+
+    let total = 0;
+
+    routes.forEach((r,i)=>{
+        total += r.price;
+
+        table.innerHTML += `
+        <tr>
+            <td>Route ${i+1}</td>
+            <td>${r.route}</td>
+            <td>${r.price}</td>
+        </tr>`;
+    });
+
+    document.getElementById("previewTotal").innerText =
+        "TOTAL AMOUNT : " + total;
+}
+
+// PDF GENERATE
+function generatePDF(){
+
+    if(routes.length === 0){
+        alert("Add at least one route");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    let img = new Image();
+    img.src = "logo.png";
+
+    img.onload = function(){
+
+        // LOGO
+        doc.addImage(img, "PNG", 85, 10, 40, 25);
+
+        // HEADER
+        doc.setFontSize(16);
+        doc.text("KRISHNA TOURS AND TRAVEL", 50, 45);
+
+        doc.setFontSize(14);
+        doc.text("RECEIPT / INVOICE", 70, 55);
+
+        // DATE
+        let today = new Date().toLocaleDateString();
+        doc.text("Date : " + today, 20, 70);
+
+        // PASSENGER
+        doc.text("Passenger : " + routes[0].passenger, 20, 80);
+
+        // TABLE DATA
+        let tableData = [];
+        let total = 0;
+
+        routes.forEach((r,i)=>{
+            total += r.price;
+            tableData.push([
+                "Route " + (i+1),
+                r.route,
+                r.price
+            ]);
+        });
+
+        // TABLE GRID
+        doc.autoTable({
+            startY: 90,
+            head: [["Route", "Details", "Price"]],
+            body: tableData
+        });
+
+        // TOTAL
+        let finalY = doc.lastAutoTable.finalY + 10;
+        doc.setFontSize(14);
+        doc.text("TOTAL AMOUNT : " + total, 20, finalY);
+
+        // FOOTER
+        doc.setFontSize(10);
+        doc.text("THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS", 20, 270);
+        doc.text("Contact : 7457011613", 20, 276);
+        doc.text("HR38ABJ8203 (Maruti Suzuki Ertiga)", 20, 282);
+
+        doc.save("Invoice.pdf");
+    };
+
+    img.onerror = function(){
+        alert("Logo not found. Put logo.png in same folder.");
+    };
+}
+
+</script>
+
+</body>
+</html>
