@@ -11,43 +11,102 @@
 
     <style>
         body{
-            font-family: Arial;
-            padding:20px;
-            background:#f4f4f4;
-        }
+    font-family: Arial;
+    padding:20px;
+    background:#f4f4f4;
+}
 
-        input,button{
-            padding:8px;
-            margin:5px;
-        }
+/* Inputs + Buttons */
+input,button{
+    padding:10px;
+    margin:5px;
+    font-size:14px;
+}
 
-        button{
-            background:#007bff;
-            color:white;
-            border:none;
-            cursor:pointer;
-        }
+/* Default Desktop Layout */
+button{
+    background:#007bff;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
 
-        table{
-            width:100%;
-            border-collapse: collapse;
-            background:white;
-            margin-top:20px;
-        }
+/* Table */
+table{
+    width:100%;
+    border-collapse: collapse;
+    background:white;
+    margin-top:20px;
+}
 
-        th,td{
-            border:1px solid black;
-            padding:8px;
-            text-align:center;
-        }
+th,td{
+    border:1px solid black;
+    padding:8px;
+    text-align:center;
+}
 
-        #previewBox{
-            margin-top:30px;
-            padding:20px;
-            background:white;
-            border:2px solid black;
-            display:none;
-        }
+/* Preview */
+#previewBox{
+    margin-top:30px;
+    padding:20px;
+    background:white;
+    border:2px solid black;
+    display:none;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px){
+
+    body{
+        padding:10px;
+    }
+
+    h2{
+        font-size:20px;
+        text-align:center;
+    }
+
+    /* Inputs Full Width */
+    input{
+        width:95%;
+        display:block;
+        margin:8px auto;
+        font-size:16px;
+    }
+
+    /* Buttons Full Width */
+    button{
+        width:95%;
+        display:block;
+        margin:8px auto;
+        font-size:16px;
+    }
+
+    /* Table Scroll */
+    table{
+        display:block;
+        overflow-x:auto;
+        white-space:nowrap;
+    }
+
+    /* Preview Box */
+    #previewBox{
+        padding:12px;
+    }
+
+    #previewBox img{
+        width:90px;
+    }
+
+    #previewBox h2{
+        font-size:18px;
+    }
+
+    #previewBox h3{
+        font-size:16px;
+    }
+}
+
     </style>
 </head>
 
@@ -108,7 +167,7 @@
     <p style="margin-top:20px;">
     THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS<br>
     Contact : 7457011613<br>
-    HR38ABJ8203 (Maruti Suzuki Ertiga)
+    <!-- HR38ABJ8203 (Maruti Suzuki Ertiga) -->
     </p>
 
 </div>
@@ -116,6 +175,7 @@
 <script>
 
 let routes = [];
+let vehicleNumber = "HR38ABJ8203 (Maruti Suzuki Ertiga)";
 
 // ADD ENTRY
 function addEntry(){
@@ -127,6 +187,12 @@ function addEntry(){
     if(!passenger || !route || !price){
         alert("Fill all fields");
         return;
+    }
+
+    // Ask Vehicle Number Only Once
+    if(vehicleNumber === ""){
+        vehicleNumber = prompt("Enter Vehicle Number");
+        if(!vehicleNumber) vehicleNumber = "N/A";
     }
 
     routes.push({
@@ -178,8 +244,9 @@ function showPreview(){
     let today = new Date().toLocaleDateString();
     document.getElementById("previewDate").innerText = "Date : " + today;
 
-    document.getElementById("previewPassenger").innerText =
-        "Passenger : " + routes[0].passenger;
+    document.getElementById("previewPassenger").innerHTML =
+        "Passenger : " + routes[0].passenger +
+        "<br>Vehicle No : " + vehicleNumber;
 
     let table = document.getElementById("previewTable");
     table.innerHTML = "";
@@ -222,17 +289,29 @@ function generatePDF(){
 
         // HEADER
         doc.setFontSize(16);
-        doc.text("KRISHNA TOURS AND TRAVEL", 50, 45);
+        doc.text(
+            "KRISHNA TOURS AND TRAVEL",
+            doc.internal.pageSize.getWidth() / 2,
+            45,
+            { align: "center" }
+        );
 
-        doc.setFontSize(14);
-        doc.text("RECEIPT / INVOICE", 70, 55);
+       doc.setFontSize(14);
+        doc.text(
+            "RECEIPT / INVOICE",
+            doc.internal.pageSize.getWidth() / 2,
+            55,
+            { align: "center" }
+        );
+
 
         // DATE
         let today = new Date().toLocaleDateString();
         doc.text("Date : " + today, 20, 70);
 
-        // PASSENGER
+        // PASSENGER + VEHICLE
         doc.text("Passenger : " + routes[0].passenger, 20, 80);
+        doc.text("Vehicle No : " + vehicleNumber, 20, 88);
 
         // TABLE DATA
         let tableData = [];
@@ -247,23 +326,41 @@ function generatePDF(){
             ]);
         });
 
-        // TABLE GRID
+        // TABLE
         doc.autoTable({
-            startY: 90,
+            startY: 100,
             head: [["Route", "Details", "Price"]],
             body: tableData
         });
 
-        // TOTAL
+        // TOTAL RIGHT SIDE
         let finalY = doc.lastAutoTable.finalY + 10;
         doc.setFontSize(14);
-        doc.text("TOTAL AMOUNT : " + total, 20, finalY);
+        doc.text(
+            "TOTAL AMOUNT : " + total,
+            200,
+            finalY,
+            { align: "right" }
+        );
 
-        // FOOTER
-        doc.setFontSize(10);
-        doc.text("THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS", 20, 270);
-        doc.text("Contact : 7457011613", 20, 276);
-        doc.text("HR38ABJ8203 (Maruti Suzuki Ertiga)", 20, 282);
+        // THANK YOU CENTER
+        doc.setFontSize(11);
+        doc.text(
+            "THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS",
+            105,
+            270,
+            { align: "center",
+              maxWidth: 200
+             }
+        );
+
+        doc.setFont("helvetica", "bold");
+        doc.text(
+            "Contact :" + " 7457011613",
+            105,
+            278,
+            { align: "center"}
+        );
 
         doc.save("Invoice.pdf");
     };
@@ -274,6 +371,7 @@ function generatePDF(){
 }
 
 </script>
+
 
 </body>
 </html>
