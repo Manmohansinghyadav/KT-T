@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Invoice Bill Maker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Invoice Maker</title>
 
     <link rel="icon" type="image/png" href="KT&T BGR.png">
 
-    <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <!-- AutoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
 <style>
 /* Animated Background & Font Setup */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
@@ -58,7 +58,8 @@ input {
     transition: all 0.3s ease;
     background-color: rgba(255, 255, 255, 0.9);
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    width: calc(25% - 15px); /* Keeps them inline nicely on desktop */
+    flex: 1 1 200px;
+    max-width: 280px;
 }
 
 input:focus {
@@ -78,7 +79,7 @@ button {
     font-family: 'Poppins', sans-serif;
     color: white;
     border: none;
-    border-radius: 50px; /* Pill shape */
+    border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     text-transform: uppercase;
@@ -120,7 +121,6 @@ th, td {
 }
 
 th {
-    background: #1a2a6c;
     background: linear-gradient(to right, #1a2a6c, #b21f1f, #fdbb2d);
     color: #ffffff;
     font-size: 14px;
@@ -135,7 +135,7 @@ tbody tr {
 
 tbody tr:hover {
     background-color: #f1f2f6;
-    transform: scale(1.01); /* Slight zoom on hover */
+    transform: scale(1.01);
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
@@ -175,7 +175,6 @@ td[contenteditable="true"]:hover {
     animation: fadeIn 0.8s ease-out;
 }
 
-/* Jagged bottom edge for receipt effect */
 #previewBox::after {
     content: "";
     position: absolute;
@@ -201,6 +200,7 @@ td[contenteditable="true"]:hover {
     font-weight: 400;
     font-size: 16px;
     letter-spacing: 3px;
+    text-align: center;
 }
 
 #previewBox table {
@@ -248,7 +248,7 @@ td[contenteditable="true"]:hover {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     body { padding: 15px; }
-    input { width: 100%; margin: 10px 0; }
+    input { max-width: 100%; margin: 10px 0; }
     button { width: 100%; margin: 10px 0; border-radius: 10px; }
     table { display: block; overflow-x: auto; white-space: nowrap; }
     #previewBox { padding: 25px 15px; }
@@ -260,45 +260,44 @@ td[contenteditable="true"]:hover {
 
 <h2>Invoice Bill Maker</h2>
 
+<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+    <input type="text" id="passenger" placeholder="Passenger Name">
+    <input type="text" id="route" placeholder="Route Details">
+    <input type="number" id="price" placeholder="Route Price">
+    <input type="date" id="customDate" title="Select Date">
+    <input type="text" id="vehicleNo" value="HR38ABJ8203 (Maruti Suzuki Ertiga)" placeholder="Vehicle Number">
+    <input type="text" id="driverName" value="Nem Singh" placeholder="Driver Name">
+</div>
 
-<input type="text" id="passenger" placeholder="Passenger Name">
-<input type="text" id="route" placeholder="Route Details">
-<input type="number" id="price" placeholder="Route Price">
-<!-- ✅ CUSTOM DATE INPUT -->
-<input type="date" id="customDate" placeholder="Select Date">
-
-<br>
-
-<button onclick="addEntry()">Add Route</button>
-<button onclick="showPreview()">Preview Invoice</button>
-<button onclick="generatePDF()">Generate PDF</button>
+<div style="text-align: center; margin-top: 15px;">
+    <button onclick="addEntry()">Add Route</button>
+    <button onclick="showPreview()">Preview Invoice</button>
+    <button onclick="generatePDF()">Download PDF</button>
+</div>
 
 <table>
-<thead>
-<tr>
-<th>Route No</th>
-<th>Passenger</th>
-<th>Route</th>
-<th>Price</th>
-</tr>
-</thead>
-
-<tbody id="tableBody"></tbody>
+    <thead>
+        <tr>
+            <th>Route No</th>
+            <th>Passenger</th>
+            <th>Route Details</th>
+            <th>Price (Rs.)</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
 </table>
 
-<h3 id="totalAmount">Total : 0</h3>
+<h3 id="totalAmount">Total : Rs. 0</h3>
 
-<!-- PREVIEW -->
 <div id="previewBox">
-
     <div style="text-align:center">
-        <img src="logo.png" width="120">
-        <h2>KRISHNA TOURS AND TRAVEL</h2>
+        <img src="logo.png" width="120" onerror="this.style.display='none'">
+        <h2>KRISHNA TOURS & TRAVEL</h2>
         <h3>RECEIPT / INVOICE</h3>
     </div>
 
-    <p id="previewDate"></p>
-    <p id="previewPassenger"></p>
+    <p id="previewDate" style="text-align: right; color: #7f8c8d;"></p>
+    <p id="previewPassenger" style="font-size: 16px; font-weight: 600; line-height: 1.6;"></p>
 
     <table>
         <thead>
@@ -313,46 +312,41 @@ td[contenteditable="true"]:hover {
 
     <h3 id="previewTotal"></h3>
 
-    <p style="margin-top:20px;">
-    THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS<br>
-    Contact : 7457011613<br>
+    <p style="margin-top:30px; text-align: center; font-size: 12px; color: #95a5a6;">
+        THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS<br>
+        <span style="font-size: 18px; color: #2c3e50; font-weight: 800; display: inline-block; margin-top: 8px;">Contact : 7457011613</span>
     </p>
-
 </div>
 
 <script>
-
 let routes = [];
-let vehicleNumber = "HR38ABJ8203 (Maruti Suzuki Ertiga)";
 
 // ADD ENTRY
 function addEntry(){
-
     let passenger = document.getElementById("passenger").value;
     let route = document.getElementById("route").value;
     let price = document.getElementById("price").value;
 
     if(!passenger || !route || !price){
-        alert("Fill all fields");
+        alert("Please fill Passenger, Route, and Price fields.");
         return;
     }
 
     routes.push({
         passenger,
         route,
-        price:Number(price)
+        price: Number(price)
     });
 
     updateTable();
 
-    document.getElementById("passenger").value="";
+    // Clear main inputs, but keep Date, Vehicle, and Driver
     document.getElementById("route").value="";
     document.getElementById("price").value="";
 }
 
 // UPDATE TABLE
 function updateTable(){
-
     let body = document.getElementById("tableBody");
     body.innerHTML="";
 
@@ -376,46 +370,57 @@ function updateTable(){
         </tr>`;
     });
 
-    document.getElementById("totalAmount").innerText="Total : "+total;
+    document.getElementById("totalAmount").innerText="Total : Rs. " + total.toLocaleString('en-IN');
 }
 
+// UPDATE CELL DATA
 function updateCell(index, field, value){
-
     if(field === "price"){
-        value = Number(value);
+        value = Number(value.replace(/[^0-9.-]+/g,"")); 
         if(isNaN(value)) value = 0;
     }
-
     routes[index][field] = value;
     updateTable();
 }
 
-// 🔥 DATE FUNCTION (Custom + Default)
+// GET DATE
 function getFinalDate(){
     let selectedDate = document.getElementById("customDate").value;
-
-    return selectedDate 
-        ? new Date(selectedDate).toLocaleDateString() 
-        : new Date().toLocaleDateString();
+    if(selectedDate){
+        let d = new Date(selectedDate);
+        return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+    }
+    let d = new Date();
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-// PREVIEW
+// SHOW PREVIEW
 function showPreview(){
-
     if(routes.length === 0){
-        alert("Add at least one route");
+        alert("Add at least one route to preview.");
         return;
     }
 
     document.getElementById("previewBox").style.display = "block";
 
     let today = getFinalDate();
+    
+    let currentVehicle = document.getElementById("vehicleNo").value.trim();
+    if (currentVehicle === "") {
+        currentVehicle = "HR38ABJ8203 (Maruti Suzuki Ertiga)";
+    }
+
+    let currentDriver = document.getElementById("driverName").value.trim();
+    if (currentDriver === "") {
+        currentDriver = "Nem Singh";
+    }
 
     document.getElementById("previewDate").innerText = "Date : " + today;
 
     document.getElementById("previewPassenger").innerHTML =
         "Passenger : " + routes[0].passenger +
-        "<br>Vehicle No : " + vehicleNumber;
+        "<br>Vehicle No : " + currentVehicle +
+        "<br>Driver : " + currentDriver;
 
     let table = document.getElementById("previewTable");
     table.innerHTML = "";
@@ -424,24 +429,21 @@ function showPreview(){
 
     routes.forEach((r,i)=>{
         total += r.price;
-
         table.innerHTML += `
         <tr>
             <td>Route ${i+1}</td>
             <td>${r.route}</td>
-            <td>${r.price}</td>
+            <td>Rs. ${r.price.toLocaleString('en-IN')}</td>
         </tr>`;
     });
 
-    document.getElementById("previewTotal").innerText =
-        "TOTAL AMOUNT : " + total;
+    document.getElementById("previewTotal").innerText = "GRAND TOTAL : Rs. " + total.toLocaleString('en-IN');
 }
 
-// PDF GENERATE
+// PDF GENERATE (ADVANCED)
 function generatePDF(){
-
     if(routes.length === 0){
-        alert("Add at least one route");
+        alert("Please add at least one route.");
         return;
     }
 
@@ -452,50 +454,138 @@ function generatePDF(){
     img.src = "logo.png";
 
     img.onload = function(){
-
-        doc.addImage(img, "PNG", 85, 10, 40, 25);
-
-        doc.setFontSize(16);
-        doc.text("KRISHNA TOURS AND TRAVEL", 105, 45, { align: "center" });
-
-        doc.setFontSize(14);
-        doc.text("RECEIPT / INVOICE", 105, 55, { align: "center" });
-
-        let today = getFinalDate();
-
-        doc.text("Date : " + today, 20, 70);
-        doc.text("Passenger : " + routes[0].passenger, 20, 80);
-        doc.text("Vehicle No : " + vehicleNumber, 20, 88);
-
-        let tableData = [];
-        let total = 0;
-
-        routes.forEach((r,i)=>{
-            total += r.price;
-            tableData.push(["Route " + (i+1), r.route, r.price]);
-        });
-
-        doc.autoTable({
-            startY: 100,
-            head: [["Route", "Details", "Price"]],
-            body: tableData
-        });
-
-        let finalY = doc.lastAutoTable.finalY + 10;
-
-        doc.text("TOTAL AMOUNT : " + total, 200, finalY, { align: "right" });
-
-        doc.text("THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS", 105, 270, { align: "center" });
-        doc.text("Contact : 7457011613", 105, 278, { align: "center" });
-
-        doc.save("Invoice.pdf");
+        createPDFDesign(doc, img);
     };
 
     img.onerror = function(){
-        alert("Logo not found. Put logo.png in same folder.");
+        createPDFDesign(doc, null);
     };
 }
 
+function createPDFDesign(doc, img) {
+    const primaryColor = [26, 42, 108]; 
+    const secondaryColor = [100, 100, 100]; 
+
+    // --- HEADER ---
+    if(img) {
+        doc.addImage(img, "PNG", 14, 10, 35, 20); 
+    }
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    let textX = img ? 55 : 14; 
+    doc.text("KRISHNA TOURS & TRAVEL", textX, 20);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+    doc.text("Premium Taxi & Travel Services", textX, 26);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(28);
+    doc.setTextColor(220, 220, 220); 
+    doc.text("INVOICE", 195, 25, { align: "right" });
+
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.5);
+    doc.line(14, 35, 195, 35);
+
+    // --- BILLING DETAILS ---
+    let today = getFinalDate();
+    
+    let currentVehicle = document.getElementById("vehicleNo").value.trim();
+    if (currentVehicle === "") {
+        currentVehicle = "HR38ABJ8203 (Maruti Suzuki Ertiga)";
+    }
+
+    let currentDriver = document.getElementById("driverName").value.trim();
+    if (currentDriver === "") {
+        currentDriver = "Nem Singh";
+    }
+    
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("BILLED TO:", 14, 45);
+    doc.setFont("helvetica", "normal");
+    doc.text("Passenger : " + routes[0].passenger, 14, 52);
+    doc.text("Vehicle No : " + currentVehicle, 14, 58);
+    doc.text("Driver Name : " + currentDriver, 14, 64);
+
+    doc.setFont("helvetica", "bold");
+    doc.text("INVOICE DETAILS:", 120, 45);
+    doc.setFont("helvetica", "normal");
+    doc.text("Date : " + today, 120, 52);
+    let randomInv = Math.floor(Math.random() * 9000 + 1000);
+    doc.text("Invoice No : INV-" + randomInv, 120, 58);
+
+    // --- TABLE ---
+    let tableData = [];
+    let total = 0;
+
+    routes.forEach((r,i)=>{
+        total += r.price;
+        tableData.push(["0" + (i+1), r.route, "Rs. " + r.price.toLocaleString('en-IN')]);
+    });
+
+    doc.autoTable({
+        startY: 75,
+        head: [["S.No", "Route Details", "Amount"]],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { 
+            fillColor: primaryColor, 
+            textColor: 255, 
+            fontStyle: 'bold',
+            halign: 'center'
+        },
+        bodyStyles: { textColor: 40 },
+        alternateRowStyles: { fillColor: [245, 248, 250] },
+        columnStyles: {
+            0: { cellWidth: 20, halign: 'center' },
+            1: { cellWidth: 'auto', halign: 'left' },
+            2: { cellWidth: 40, halign: 'right' }
+        },
+        margin: { left: 14, right: 14 }
+    });
+
+    // --- TOTAL AMOUNT ---
+    let finalY = doc.lastAutoTable.finalY + 10;
+    
+    doc.setFillColor(245, 248, 250);
+    doc.rect(120, finalY, 75, 12, 'F');
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text("GRAND TOTAL :", 125, finalY + 8);
+    
+    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.text("Rs. " + total.toLocaleString('en-IN'), 190, finalY + 8, { align: "right" });
+
+    // --- FOOTER ---
+    let pageHeight = doc.internal.pageSize.height;
+    
+    doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.setLineWidth(1.5);
+    doc.line(14, pageHeight - 25, 195, pageHeight - 25);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(0,0,0);
+    doc.text("THANK YOU FOR CHOOSING KRISHNA TOURS & TRAVEL", 105, pageHeight - 18, { align: "center" });
+    
+    // UPGRADED: Bolder & Larger Mobile Number for PDF
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text("Contact: 7457011613", 105, pageHeight - 10, { align: "center" });
+
+    let pdfName = "Invoice_" + routes[0].passenger.replace(/\s+/g, '_') + ".pdf";
+    doc.save(pdfName);
+}
 </script>
 
 </body>
