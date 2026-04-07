@@ -2,52 +2,43 @@
 <html>
 <head>
     <title>Invoice Bill Maker</title>
-     <!-- Browser Tab Logo -->
+
     <link rel="icon" type="image/png" href="KT&T BGR.png">
 
     <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <!-- AutoTable (VERY IMPORTANT) -->
+    <!-- AutoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
-    <style>
-        body{
+<style>
+body{
     font-family: Arial;
     padding:20px;
     background:#f4f4f4;
 }
-
-/* Inputs + Buttons */
 input,button{
     padding:10px;
     margin:5px;
     font-size:14px;
 }
-
-/* Default Desktop Layout */
 button{
     background:#007bff;
     color:white;
     border:none;
     cursor:pointer;
 }
-
-/* Table */
 table{
     width:100%;
     border-collapse: collapse;
     background:white;
     margin-top:20px;
 }
-
 th,td{
     border:1px solid black;
     padding:8px;
     text-align:center;
 }
-
-/* Preview */
 #previewBox{
     margin-top:30px;
     padding:20px;
@@ -55,70 +46,31 @@ th,td{
     border:2px solid black;
     display:none;
 }
-
-/* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px){
-
-    body{
-        padding:10px;
-    }
-
-    h2{
-        font-size:20px;
-        text-align:center;
-    }
-
-    /* Inputs Full Width */
-    input{
+    body{ padding:10px; }
+    input,button{
         width:95%;
         display:block;
         margin:8px auto;
-        font-size:16px;
     }
-
-    /* Buttons Full Width */
-    button{
-        width:95%;
-        display:block;
-        margin:8px auto;
-        font-size:16px;
-    }
-
-    /* Table Scroll */
     table{
         display:block;
         overflow-x:auto;
-        white-space:nowrap;
-    }
-
-    /* Preview Box */
-    #previewBox{
-        padding:12px;
-    }
-
-    #previewBox img{
-        width:90px;
-    }
-
-    #previewBox h2{
-        font-size:18px;
-    }
-
-    #previewBox h3{
-        font-size:16px;
     }
 }
-
-    </style>
+</style>
 </head>
 
 <body>
 
 <h2>Invoice Bill Maker</h2>
 
+
 <input type="text" id="passenger" placeholder="Passenger Name">
 <input type="text" id="route" placeholder="Route Details">
 <input type="number" id="price" placeholder="Route Price">
+<!-- ✅ CUSTOM DATE INPUT -->
+<input type="date" id="customDate" placeholder="Select Date">
 
 <br>
 
@@ -141,7 +93,7 @@ th,td{
 
 <h3 id="totalAmount">Total : 0</h3>
 
-<!-- PREVIEW AREA -->
+<!-- PREVIEW -->
 <div id="previewBox">
 
     <div style="text-align:center">
@@ -169,7 +121,6 @@ th,td{
     <p style="margin-top:20px;">
     THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS<br>
     Contact : 7457011613<br>
-    <!-- HR38ABJ8203 (Maruti Suzuki Ertiga) -->
     </p>
 
 </div>
@@ -189,12 +140,6 @@ function addEntry(){
     if(!passenger || !route || !price){
         alert("Fill all fields");
         return;
-    }
-
-    // Ask Vehicle Number Only Once
-    if(vehicleNumber === ""){
-        vehicleNumber = prompt("Enter Vehicle Number");
-        if(!vehicleNumber) vehicleNumber = "N/A";
     }
 
     routes.push({
@@ -224,19 +169,13 @@ function updateTable(){
         body.innerHTML += `
         <tr>
             <td>Route ${i+1}</td>
-
-            <td contenteditable="true"
-                onblur="updateCell(${i}, 'passenger', this.innerText)">
+            <td contenteditable="true" onblur="updateCell(${i}, 'passenger', this.innerText)">
                 ${r.passenger}
             </td>
-
-            <td contenteditable="true"
-                onblur="updateCell(${i}, 'route', this.innerText)">
+            <td contenteditable="true" onblur="updateCell(${i}, 'route', this.innerText)">
                 ${r.route}
             </td>
-
-            <td contenteditable="true"
-                onblur="updateCell(${i}, 'price', this.innerText)">
+            <td contenteditable="true" onblur="updateCell(${i}, 'price', this.innerText)">
                 ${r.price}
             </td>
         </tr>`;
@@ -253,11 +192,17 @@ function updateCell(index, field, value){
     }
 
     routes[index][field] = value;
-
     updateTable();
 }
 
+// 🔥 DATE FUNCTION (Custom + Default)
+function getFinalDate(){
+    let selectedDate = document.getElementById("customDate").value;
 
+    return selectedDate 
+        ? new Date(selectedDate).toLocaleDateString() 
+        : new Date().toLocaleDateString();
+}
 
 // PREVIEW
 function showPreview(){
@@ -269,7 +214,8 @@ function showPreview(){
 
     document.getElementById("previewBox").style.display = "block";
 
-    let today = new Date().toLocaleDateString();
+    let today = getFinalDate();
+
     document.getElementById("previewDate").innerText = "Date : " + today;
 
     document.getElementById("previewPassenger").innerHTML =
@@ -312,83 +258,40 @@ function generatePDF(){
 
     img.onload = function(){
 
-        // LOGO
         doc.addImage(img, "PNG", 85, 10, 40, 25);
 
-        // HEADER
         doc.setFontSize(16);
-        doc.text(
-            "KRISHNA TOURS AND TRAVEL",
-            doc.internal.pageSize.getWidth() / 2,
-            45,
-            { align: "center" }
-        );
+        doc.text("KRISHNA TOURS AND TRAVEL", 105, 45, { align: "center" });
 
-       doc.setFontSize(14);
-        doc.text(
-            "RECEIPT / INVOICE",
-            doc.internal.pageSize.getWidth() / 2,
-            55,
-            { align: "center" }
-        );
+        doc.setFontSize(14);
+        doc.text("RECEIPT / INVOICE", 105, 55, { align: "center" });
 
+        let today = getFinalDate();
 
-        // DATE
-        let today = new Date().toLocaleDateString();
         doc.text("Date : " + today, 20, 70);
-
-        // PASSENGER + VEHICLE
         doc.text("Passenger : " + routes[0].passenger, 20, 80);
         doc.text("Vehicle No : " + vehicleNumber, 20, 88);
 
-        // TABLE DATA
         let tableData = [];
         let total = 0;
 
         routes.forEach((r,i)=>{
             total += r.price;
-            tableData.push([
-                "Route " + (i+1),
-                r.route,
-                r.price
-            ]);
+            tableData.push(["Route " + (i+1), r.route, r.price]);
         });
 
-        // TABLE
         doc.autoTable({
             startY: 100,
             head: [["Route", "Details", "Price"]],
             body: tableData
         });
 
-        // TOTAL RIGHT SIDE
         let finalY = doc.lastAutoTable.finalY + 10;
-        doc.setFontSize(14);
-        doc.text(
-            "TOTAL AMOUNT : " + total,
-            200,
-            finalY,
-            { align: "right" }
-        );
 
-        // THANK YOU CENTER
-        doc.setFontSize(11);
-        doc.text(
-            "THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS",
-            105,
-            270,
-            { align: "center",
-              maxWidth: 200
-             }
-        );
+        doc.text("TOTAL AMOUNT : " + total, 200, finalY, { align: "right" });
 
-        doc.setFont("helvetica", "bold");
-        doc.text(
-            "Contact :" + " 7457011613",
-            105,
-            278,
-            { align: "center"}
-        );
+        doc.text("THANK YOU FOR CHOOSING KRISHNA TOURS AND TRAVELS", 105, 270, { align: "center" });
+        doc.text("Contact : 7457011613", 105, 278, { align: "center" });
 
         doc.save("Invoice.pdf");
     };
@@ -399,7 +302,6 @@ function generatePDF(){
 }
 
 </script>
-
 
 </body>
 </html>
