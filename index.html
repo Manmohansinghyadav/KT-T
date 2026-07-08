@@ -8,7 +8,6 @@
     <link rel="icon" type="image/png" href="KT&T BGR.png">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
 <style>
@@ -440,7 +439,7 @@ function showPreview(){
     document.getElementById("previewTotal").innerText = "GRAND TOTAL : Rs. " + total.toLocaleString('en-IN');
 }
 
-// PDF GENERATE (ADVANCED)
+// PDF GENERATE (HIGH QUALITY - UNDER 5MB)
 function generatePDF(){
     if(routes.length === 0){
         alert("Please add at least one route.");
@@ -448,13 +447,32 @@ function generatePDF(){
     }
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    // PDF structure aur text ko compress karega size control ke liye
+    const doc = new jsPDF({ compress: true }); 
 
     let img = new Image();
     img.src = "logo.png";
+    img.crossOrigin = "Anonymous"; 
 
     img.onload = function(){
-        createPDFDesign(doc, img);
+        let canvas = document.createElement("canvas");
+        
+        // Max width 1000px rakhi hai taaki logo ekdum HD quality mein aaye
+        let maxWidth = 1000; 
+        let scale = Math.min(maxWidth / img.width, 1); 
+        
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        
+        let ctx = canvas.getContext("2d");
+        
+        // PNG format ke liye white background ki zarurat nahi, direct draw karein
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // High Quality PNG generate karna
+        let highQualityDataUrl = canvas.toDataURL("image/png");
+        
+        createPDFDesign(doc, highQualityDataUrl);
     };
 
     img.onerror = function(){
@@ -462,19 +480,20 @@ function generatePDF(){
     };
 }
 
-function createPDFDesign(doc, img) {
+function createPDFDesign(doc, imgData) {
     const primaryColor = [26, 42, 108]; 
     const secondaryColor = [100, 100, 100]; 
 
     // --- HEADER ---
-    if(img) {
-        doc.addImage(img, "PNG", 14, 10, 35, 20); 
+    if(imgData) {
+        // Yahan wapas PNG use kiya gaya hai highest quality ke liye
+        doc.addImage(imgData, "PNG", 14, 10, 35, 20); 
     }
     
     doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-    let textX = img ? 55 : 14; 
+    let textX = imgData ? 55 : 14; 
     doc.text("KRISHNA TOURS & TRAVEL", textX, 20);
     
     doc.setFont("helvetica", "normal");
@@ -577,7 +596,6 @@ function createPDFDesign(doc, img) {
     doc.setTextColor(0,0,0);
     doc.text("THANK YOU FOR CHOOSING KRISHNA TOURS & TRAVEL", 105, pageHeight - 18, { align: "center" });
     
-    // UPGRADED: Bolder & Larger Mobile Number for PDF
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
